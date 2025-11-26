@@ -16,7 +16,7 @@ def drop_invalid_part_ids(_df):
         if pd.isna(value):
             return True
         try:
-            float(value)
+            int(value)
             return True
         except (ValueError, TypeError):
             return False
@@ -25,21 +25,24 @@ def drop_invalid_part_ids(_df):
         part_id for part_id in unique_part_ids if not is_numeric(part_id)
     ]
 
-    # print("-" * 50)
-    # print(f"Total non-numeric/invalid IDs found: {len(non_numeric_ids)}")
-
 
     for _id in non_numeric_ids:
-        # count the number of rows for each participant ID
         _df.loc[_df['part_id'] == _id, 'count'] = _df.loc[_df['part_id'] == _id].shape[0]
-        # print(f"{_id}: {_df.loc[_df['part_id'] == _id, 'count'].values[0]}")
-        # drop the rows with invalid participant IDs
         _df = _df.drop(_df.index[_df['part_id'] == _id])
 
     return _df
 
+def print_unique_part_ids(_df):
+    unique_part_ids = _df['part_id'].unique()
+
+    unique_part_ids.sort()
+    print(f"Total unique participant IDs: {len(unique_part_ids)}")
+    for part_id in unique_part_ids:
+        print(f"{part_id}: {_df.loc[_df['part_id'] == part_id].shape[0]}")
 
 def fix_room_names(_df):
+
+    _df = _df.dropna(subset=['room'])
 
     aliases = dict()
 
@@ -126,8 +129,10 @@ def print_unique_rooms(_df):
     for room in unique_rooms:
         print(f"{room}: {_df.loc[_df['room'] == room].shape[0]}")
 
+# def fix_continuity_issues(_df):
+    
 
-def fix_continuity(_df):
+
     
 
 
@@ -138,6 +143,7 @@ if __name__ == "__main__":
     print(f"Time taken to read the CSV: {time.time() - time1} seconds")
 
     df = drop_invalid_part_ids(df)
-    df = df.dropna(subset=['room'])
+    print_unique_part_ids(df)
+    
     df = fix_room_names(df)
     print_unique_rooms(df)
