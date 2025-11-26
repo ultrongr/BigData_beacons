@@ -97,7 +97,7 @@ def fix_room_names(_df):
     # --- Storage / Misc ---
     aliases['Storage'] = ["Storage"]
     aliases['Garage'] = ["Garage"]
-    aliases['Laundry'] = ["Laundry", "LaundryRoom"]
+    aliases['Laundry'] = ["Laundry", "LaundryRoom", "Washroom"]
     aliases['Library'] = ["Library"]
     aliases['Pantry'] = ["Pantry"]
     aliases['Desk'] = ["Desk"]
@@ -130,8 +130,44 @@ def print_unique_rooms(_df):
         print(f"{room}: {_df.loc[_df['room'] == room].shape[0]}")
 
 # def fix_continuity_issues(_df):
-    
+#     unique_participant_ids = _df['part_id'].unique()
+#     for part_id in unique_participant_ids:
+#         participant_data = _df[_df['part_id'] == part_id]
+#         # Implement continuity fixes here as needed
+#         # Placeholder for actual logic
 
+def fix_continuity_issues(_df):
+    _df = _df.copy()
+
+    # Convert to string first!
+    _df['ts_date'] = _df['ts_date'].astype(str)
+    _df['ts_time'] = _df['ts_time'].astype(str)
+
+    # Build a timestamp
+    _df['timestamp'] = pd.to_datetime(_df['ts_date'] + ' ' + _df['ts_time'], errors='coerce')
+
+    # Sort properly
+    _df = _df.sort_values(['part_id', 'timestamp']).reset_index(drop=True)
+
+    # Detect duplicates
+    prev_room = _df.groupby('part_id')['room'].shift()
+    dup_mask = prev_room == _df['room']
+
+    # Print duplicates
+    duplicates = _df[dup_mask]
+    if not duplicates.empty:
+        print("Consecutive duplicate room entries detected:")
+        print(duplicates[['part_id', 'ts_date', 'ts_time', 'room']])
+    else:
+        print("No consecutive duplicates found.")
+
+    # Remove duplicates
+    cleaned_df = _df[~dup_mask].reset_index(drop=True)
+
+    return cleaned_df
+
+def combine_rows(_df):
+    unique_participant_ids = _df['part_id'].unique()
 
     
 
@@ -147,3 +183,5 @@ if __name__ == "__main__":
     
     df = fix_room_names(df)
     print_unique_rooms(df)
+
+    df = fix_continuity_issues(df)
