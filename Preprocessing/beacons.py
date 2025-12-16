@@ -3,7 +3,7 @@ import time
 
 
 input_file = "../Raw Data/beacons_dataset_commas.csv"
-output_file = "../Preprocessed Data/beacons_dataset_commas.csv"
+output_file = "../Preprocessed Data/beacons_dataset_preprocessed.csv"
 
 
 
