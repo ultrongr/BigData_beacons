@@ -4,3 +4,4 @@ room changes during the night
 room changes total
 avg (%) time in (each) room
 outdoor time
+avg number of rooms in a day
