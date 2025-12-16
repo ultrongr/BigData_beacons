@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, confusion_matrix
@@ -12,7 +14,6 @@ input_file = "../Preprocessed Data/clinical_dataset_preprocessed.csv"
 df = pd.read_csv(input_file)
 
 # 2. Define the columns strictly forbidden by the project description
-# These are the columns used to derive the 'fried' status.
 forbidden_columns = [
     "weight_loss",
     "exhaustion_score",
@@ -22,39 +23,29 @@ forbidden_columns = [
 ]
 
 # 3. Separate Features (X) and Target (y)
-# We drop the forbidden columns AND the target column 'fried' from X
 X = df.drop(columns=["fried"] + forbidden_columns)
 y = df["fried"]
 
 # 4. Split the data into Training and Testing sets (80% Train, 20% Test)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 5. Scale the features (Crucial for Neural Networks)
-# NNs struggle if input features have vastly different ranges (e.g. Age vs BMI)
+# 5. Scale the features
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # 6. Build the Neural Network
 model = keras.Sequential([
-    # Input Layer
     keras.Input(shape=(X_train_scaled.shape[1],)),
-    
-    # Hidden Layer 1: 16 neurons, ReLU activation
     layers.Dense(16, activation='relu'),
-    
-    # Hidden Layer 2: 8 neurons, ReLU activation (optional, helps with complexity)
     layers.Dense(8, activation='relu'),
-    
-    # Output Layer: 3 neurons (Non-frail, Pre-frail, Frail)
-    # We use 'softmax' to get a probability distribution across the 3 classes
     layers.Dense(3, activation='softmax')
 ])
 
 # 7. Compile the model
 model.compile(
     optimizer='adam',
-    loss='sparse_categorical_crossentropy', # Use sparse because y is integers (0,1,2), not one-hot encoded
+    loss='sparse_categorical_crossentropy',
     metrics=['accuracy']
 )
 
@@ -63,9 +54,9 @@ print("Training Neural Network...")
 history = model.fit(
     X_train_scaled, 
     y_train, 
-    epochs=50,          # Number of passes through the data
-    batch_size=8,       # Update weights after every 8 samples
-    validation_split=0.2, # Use 20% of training data to validate during training
+    epochs=50,
+    batch_size=8,
+    validation_split=0.2,
     verbose=1
 )
 
@@ -75,12 +66,48 @@ print(f"\nTest Set Accuracy: {accuracy*100:.2f}%")
 
 # 10. Detailed Classification Report
 y_pred_probs = model.predict(X_test_scaled)
-y_pred = np.argmax(y_pred_probs, axis=1) # Convert probabilities to class labels (0,1,2)
+y_pred = np.argmax(y_pred_probs, axis=1)
 
 target_names = ['Non-frail (0)', 'Pre-frail (1)', 'Frail (2)']
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred, target_names=target_names, zero_division=0))
 
-# Optional: Confusion Matrix
-print("Confusion Matrix:")
-print(confusion_matrix(y_test, y_pred))
+# --- Visualization 1: Confusion Matrix Heatmap ---
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix (Numerical):")
+print(cm)
+
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=target_names, yticklabels=target_names)
+plt.title('Confusion Matrix: Neural Network')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.tight_layout()
+plt.show()
+
+# --- Visualization 2: Training History (Accuracy & Loss) ---
+# This shows if the model was learning or just memorizing
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+epochs_range = range(len(acc))
+
+plt.figure(figsize=(12, 4))
+
+# Plot Accuracy
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
+
+# Plot Loss
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+
+plt.tight_layout()
+plt.show()
