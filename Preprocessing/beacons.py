@@ -185,3 +185,5 @@ if __name__ == "__main__":
     print_unique_rooms(df)
 
     df = fix_continuity_issues(df)
+    df.to_csv(output_file, index=False)
+    print(f"Preprocessed data saved to: {output_file}")
