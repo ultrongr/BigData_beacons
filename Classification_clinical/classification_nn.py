@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, confusion_matrix
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers
+from tensorflow.keras import layers  # type: ignore
 
 # 1. Load the preprocessed data
 input_file = "../Preprocessed Data/clinical_dataset_preprocessed.csv"
