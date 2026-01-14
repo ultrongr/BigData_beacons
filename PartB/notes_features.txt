@@ -7,3 +7,4 @@ outdoor time
 avg number of rooms in a day
 time in office
 time in kitchen
+
