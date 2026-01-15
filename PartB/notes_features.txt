@@ -8,3 +8,9 @@ avg number of rooms in a day
 time in office
 time in kitchen
 
+gait_speed4m
+gait_get_up
+activity_regular
+age
+bmi_score
+raise_chair_time

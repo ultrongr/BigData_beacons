@@ -17,7 +17,8 @@ forbidden_columns = [
     "exhaustion_score",
     "gait_speed_slower",
     "grip_strength_abnormal",
-    "low_physical_activity"
+    "low_physical_activity",
+    "part_id"
 ]
 
 # 3. Separate Features (X) and Target (y)
