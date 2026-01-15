@@ -78,12 +78,15 @@ for pid, g in df.groupby("part_id"):
     outdoor_time = g.loc[g["room"] == OUTDOOR_LABEL, "duration"].sum()
     office_time = g.loc[g["room"] == OFFICE_LABEL, "duration"].sum()
     kitchen_time = g.loc[g["room"] == KITCHEN_LABEL, "duration"].sum()
+    bedroom_time = g.loc[g["room"] == BEDROOM_LABEL, "duration"].sum()
+    bathroom_time = g.loc[g["room"] == BATHROOM_LABEL, "duration"].sum()
 
     # --- Normalize to % of total ---
     pct_bedroom_night = 100 * bedroom_night / total_time
     pct_bathroom_night = 100 * bathroom_night / total_time
     pct_outdoor = 100 * outdoor_time / total_time
-    pct_office = 100 * office_time / total_time
+    pct_bedroom = 100 * bedroom_time / total_time
+    pct_bathroom = 100 * bathroom_time / total_time
     pct_kitchen = 100 * kitchen_time / total_time
 
     # --- Room changes ---
@@ -101,17 +104,20 @@ for pid, g in df.groupby("part_id"):
     row = {
         "part_id": pid,
         "pct_time_bedroom_night": pct_bedroom_night,
+        "pct_time_bedroom": pct_bedroom,
         "pct_time_bathroom_night": pct_bathroom_night,
+        "pct_time_bathroom": pct_bathroom,
         "pct_time_outdoor": pct_outdoor,
-        "pct_time_office": pct_office,
+        # "pct_time_office": pct_office,
         "pct_time_kitchen": pct_kitchen,
         "room_changes_night": room_changes_night,
         "room_changes_total": room_changes_total,
-        "avg_rooms_per_day": avg_rooms_per_day,
+        # "avg_rooms_per_day": avg_rooms_per_day,
+        
     }
 
-    for room, pct in pct_time_per_room.items():
-        row[f"pct_time_{room.lower()}"] = pct
+    # for room, pct in pct_time_per_room.items():
+    #     row[f"pct_time_{room.lower()}"] = pct
 
     rows.append(row)
 
@@ -120,6 +126,7 @@ for pid, g in df.groupby("part_id"):
 # Output
 # -----------------------------
 out_df = pd.DataFrame(rows)
+out_df = out_df.round(2)
 out_df.to_csv(OUTPUT_CSV, index=False)
 
 print(f"Saved normalized features to {OUTPUT_CSV}")
