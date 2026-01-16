@@ -1,0 +1,5 @@
+cluster,gait_speed_4m,gait_get_up,raise_chair_time,activity_regular,age,bmi_score,room_changes_total,room_changes_night,pct_time_kitchen,pct_time_outdoor
+0,3.64,7.99,11.97,2.58,76.19,26.23,165.36,15.6,12.73,19.02
+1,2.28,6.06,6.59,3.0,77.0,921.14,1690.0,852.0,53.19,7.93
+2,5.69,9.31,13.03,1.38,74.58,28.25,109.17,15.94,44.06,10.83
+3,9.0,16.36,19.04,2.0,81.37,28.53,75.37,5.63,8.44,26.17

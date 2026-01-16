@@ -13,17 +13,13 @@ from scipy.stats import f_oneway
 # -----------------------------
 # 1. Load data
 # -----------------------------
-FILTERED_PATH = "filtered.csv"
-UNFILTERED_PATH = "unfiltered.csv"
-
-# df_beacon_features = pd.read_csv("participant_features.csv")
-# df_clinical = pd.read_csv("../Preprocessed Data/clinical_dataset_preprocessed.csv")
 df_filtered = pd.read_csv("participant_features.csv")
 df_unfiltered = pd.read_csv("../Preprocessed Data/clinical_dataset_preprocessed.csv")
 
 
 # -----------------------------
 # 2. Select columns from unfiltered dataset
+#    (fried INCLUDED ONLY for validation)
 # -----------------------------
 cols_unfiltered = [
     "part_id",
@@ -32,7 +28,8 @@ cols_unfiltered = [
     "raise_chair_time",
     "activity_regular",
     "age",
-    "bmi_score"
+    "bmi_score",
+    "fried"   # ordinal: 0,1,2 (validation only)
 ]
 
 df_unfiltered_subset = df_unfiltered[cols_unfiltered]
@@ -52,6 +49,7 @@ print(f"Merged dataset shape: {df.shape}")
 
 # -----------------------------
 # 4. Select clustering features
+#    (fried EXCLUDED)
 # -----------------------------
 features = [
     "gait_speed_4m",
@@ -84,7 +82,7 @@ X_scaled = scaler.fit_transform(X_imputed)
 
 
 # -----------------------------
-# 7. Elbow method to choose k
+# 7. Elbow method
 # -----------------------------
 inertia = []
 k_range = range(2, 8)
@@ -104,9 +102,9 @@ plt.show()
 
 
 # -----------------------------
-# 8. Fit final clustering model
+# 8. Fit clustering model
 # -----------------------------
-K = 3  # adjust based on elbow plot
+K = 4
 kmeans = KMeans(n_clusters=K, random_state=42, n_init=10)
 df["cluster"] = kmeans.fit_predict(X_scaled)
 
@@ -128,9 +126,9 @@ print(cluster_summary)
 
 
 # -----------------------------
-# 10. Statistical validation (ANOVA)
+# 10. ANOVA on clustering features
 # -----------------------------
-print("\nANOVA p-values by feature:")
+print("\nANOVA p-values by clustering feature:")
 for col in features:
     groups = [
         df[df.cluster == c][col].dropna()
@@ -140,8 +138,29 @@ for col in features:
     print(f"{col:25s}: {pval:.4e}")
 
 
+# =====================================================
+# FRIED FRAILTY VALIDATION (ORDINAL, NOT USED IN CLUSTERING)
+# =====================================================
+
+print("\nMean FRIED score by cluster:")
+print(
+    df.groupby("cluster")["fried"]
+      .mean()
+      .round(3)
+)
+
+# ANOVA for fried score
+fried_groups = [
+    df[df.cluster == c]["fried"].dropna()
+    for c in sorted(df.cluster.unique())
+]
+
+f_stat, pval = f_oneway(*fried_groups)
+print(f"\nANOVA p-value for FRIED score: {pval:.4e}")
+
+
 # -----------------------------
-# 11. PCA visualization (2D)
+# 11. PCA visualization
 # -----------------------------
 pca = PCA(n_components=2)
 X_pca = pca.fit_transform(X_scaled)
@@ -149,13 +168,15 @@ X_pca = pca.fit_transform(X_scaled)
 df["pca_1"] = X_pca[:, 0]
 df["pca_2"] = X_pca[:, 1]
 
+custom_colors = ["black", "red", "yellow", "blue"]
+
 plt.figure()
 sns.scatterplot(
     data=df,
     x="pca_1",
     y="pca_2",
     hue="cluster",
-    palette="Set2"
+    palette=custom_colors,
 )
 plt.title("PCA Projection of Clusters")
 plt.tight_layout()
@@ -163,7 +184,7 @@ plt.show()
 
 
 # -----------------------------
-# 12. Boxplots for interpretation
+# 12. Interpretation plots
 # -----------------------------
 key_vars = [
     "gait_speed_4m",
@@ -179,9 +200,16 @@ for var in key_vars:
     plt.tight_layout()
     plt.show()
 
+# Fried frailty visualization
+plt.figure()
+sns.boxplot(data=df, x="cluster", y="fried")
+plt.title("Fried frailty score by cluster")
+plt.tight_layout()
+plt.show()
+
 
 # -----------------------------
-# 13. Save results
+# 13. Save outputs
 # -----------------------------
 df.to_csv("clustered_dataset.csv", index=False)
 cluster_summary.to_csv("cluster_summary.csv")
