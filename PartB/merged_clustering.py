@@ -64,8 +64,14 @@ features = [
     "pct_time_outdoor"
 ]
 
-X = df[features]
 
+
+bmi_cutoff = df["bmi_score"].quantile(0.995)
+df = df[df["bmi_score"] <= bmi_cutoff].copy()
+
+print(f"Dataset size after BMI outlier removal: {df.shape[0]}")
+    
+X = df[features]
 
 # -----------------------------
 # 5. Handle missing values
@@ -104,7 +110,7 @@ plt.show()
 # -----------------------------
 # 8. Fit clustering model
 # -----------------------------
-K = 4
+K = 3
 kmeans = KMeans(n_clusters=K, random_state=42, n_init=10)
 df["cluster"] = kmeans.fit_predict(X_scaled)
 
