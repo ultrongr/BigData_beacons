@@ -61,7 +61,7 @@ features = [
     "room_changes_total",
     "room_changes_night",
     # "pct_time_kitchen",
-    # "pct_time_outdoor"
+    "pct_time_outdoor"
 ]
 
 
@@ -71,7 +71,11 @@ df = df[df["bmi_score"] <= bmi_cutoff].copy()
 
 print(f"Dataset size after BMI outlier removal: {df.shape[0]}")
     
-X = df[features]
+activity_cols = ["room_changes_total", "room_changes_night"]
+
+X = df[features].copy()
+X[activity_cols] = np.log1p(X[activity_cols])
+
 
 # -----------------------------
 # 5. Handle missing values
