@@ -60,8 +60,8 @@ features = [
     "bmi_score",
     "room_changes_total",
     "room_changes_night",
-    "pct_time_kitchen",
-    "pct_time_outdoor"
+    # "pct_time_kitchen",
+    # "pct_time_outdoor"
 ]
 
 
@@ -176,7 +176,7 @@ df["pca_2"] = X_pca[:, 1]
 fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
 
 # ---- Plot 1: Colored by cluster ----
-cluster_colors = ["black", "red", "yellow", "blue"]
+cluster_colors = ["black", "red", "yellow",]
 
 sns.scatterplot(
     data=df,
@@ -212,6 +212,48 @@ axes[1].legend(title="Fried")
 plt.tight_layout()
 plt.show()
 
+# from sklearn.decomposition import PCA
+import plotly.express as px
+
+# 3D PCA
+pca3 = PCA(n_components=3)
+X_pca3 = pca3.fit_transform(X_scaled)
+
+df["pca_1"] = X_pca3[:, 0]
+df["pca_2"] = X_pca3[:, 1]
+df["pca_3"] = X_pca3[:, 2]
+
+print("Explained variance ratio:", pca3.explained_variance_ratio_,
+      " | Cumulative:", pca3.explained_variance_ratio_.sum())
+
+# ---- Plot 1: Colored by cluster ----
+fig_cluster = px.scatter_3d(
+    df,
+    x="pca_1",
+    y="pca_2",
+    z="pca_3",
+    color="cluster",
+    opacity=0.8,
+    title="3D PCA – Colored by Cluster"
+)
+fig_cluster.update_traces(marker=dict(size=5))
+fig_cluster.show()
+
+# ---- Plot 2: Colored by FRIED ----
+fig_fried = px.scatter_3d(
+    df,
+    x="pca_1",
+    y="pca_2",
+    z="pca_3",
+    color="fried",
+    opacity=0.8,
+    color_continuous_scale="Viridis",
+    title="3D PCA – Colored by Fried Frailty"
+)
+fig_fried.update_traces(marker=dict(size=5))
+fig_fried.show()
+
+
 # -----------------------------
 # 12. Interpretation plots
 # -----------------------------
@@ -219,7 +261,7 @@ key_vars = [
     "gait_speed_4m",
     "raise_chair_time",
     "room_changes_total",
-    "pct_time_outdoor"
+    # "pct_time_outdoor"
 ]
 
 for var in key_vars:
