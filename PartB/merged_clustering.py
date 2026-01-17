@@ -158,9 +158,8 @@ fried_groups = [
 f_stat, pval = f_oneway(*fried_groups)
 print(f"\nANOVA p-value for FRIED score: {pval:.4e}")
 
-
 # -----------------------------
-# 11. PCA visualization
+# 11. PCA visualization (side-by-side)
 # -----------------------------
 pca = PCA(n_components=2)
 X_pca = pca.fit_transform(X_scaled)
@@ -168,20 +167,44 @@ X_pca = pca.fit_transform(X_scaled)
 df["pca_1"] = X_pca[:, 0]
 df["pca_2"] = X_pca[:, 1]
 
-custom_colors = ["black", "red", "yellow", "blue"]
+fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
 
-plt.figure()
+# ---- Plot 1: Colored by cluster ----
+cluster_colors = ["black", "red", "yellow", "blue"]
+
 sns.scatterplot(
     data=df,
     x="pca_1",
     y="pca_2",
     hue="cluster",
-    palette=custom_colors,
+    palette=cluster_colors,
+    ax=axes[0]
 )
-plt.title("PCA Projection of Clusters")
+
+axes[0].set_title("PCA – Colored by Cluster")
+axes[0].legend(title="Cluster")
+
+# ---- Plot 2: Colored by Fried score ----
+fried_palette = {
+    0: "green",   # robust
+    1: "orange",  # pre-frail
+    2: "red"      # frail
+}
+
+sns.scatterplot(
+    data=df,
+    x="pca_1",
+    y="pca_2",
+    hue="fried",
+    palette=fried_palette,
+    ax=axes[1]
+)
+
+axes[1].set_title("PCA – Colored by Fried Frailty")
+axes[1].legend(title="Fried")
+
 plt.tight_layout()
 plt.show()
-
 
 # -----------------------------
 # 12. Interpretation plots
