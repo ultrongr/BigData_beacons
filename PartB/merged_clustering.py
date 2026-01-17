@@ -57,11 +57,13 @@ features = [
     "raise_chair_time",
     "activity_regular",
     "age",
-    "bmi_score",
+    # "bmi_score",
     "room_changes_total",
     "room_changes_night",
     # "pct_time_kitchen",
-    "pct_time_outdoor"
+    "pct_time_outdoor",
+    "avg_time_per_room",
+    "avg_rooms_per_day"
 ]
 
 

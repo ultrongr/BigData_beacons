@@ -81,6 +81,8 @@ for pid, g in df.groupby("part_id"):
     bedroom_time = g.loc[g["room"] == BEDROOM_LABEL, "duration"].sum()
     bathroom_time = g.loc[g["room"] == BATHROOM_LABEL, "duration"].sum()
 
+    avg_time_per_room = g.groupby("room")["duration"].mean()
+
     # --- Normalize to % of total ---
     pct_bedroom_night = 100 * bedroom_night / total_time
     pct_bathroom_night = 100 * bathroom_night / total_time
@@ -112,8 +114,8 @@ for pid, g in df.groupby("part_id"):
         "pct_time_kitchen": pct_kitchen,
         "room_changes_night": room_changes_night,
         "room_changes_total": room_changes_total,
-        # "avg_rooms_per_day": avg_rooms_per_day,
-        
+        "avg_rooms_per_day": avg_rooms_per_day,
+        "avg_time_per_room": avg_time_per_room.mean()
     }
 
     # for room, pct in pct_time_per_room.items():
