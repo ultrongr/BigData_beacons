@@ -58,6 +58,8 @@ features = [
     "activity_regular",
     "age",
     # "bmi_score",
+    # "pct_time_bedroom_night",
+    # "pct_time_bathroom_night",
     "room_changes_total",
     "room_changes_night",
     # "pct_time_kitchen",
