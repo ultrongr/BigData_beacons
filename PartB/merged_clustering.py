@@ -8,6 +8,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from scipy.stats import f_oneway
+from sklearn.metrics import silhouette_score, silhouette_samples
+
 
 
 # -----------------------------
@@ -114,6 +116,29 @@ plt.title("Elbow Method for KMeans")
 plt.tight_layout()
 plt.show()
 
+# -----------------------------
+# 7b. Silhouette analysis
+# -----------------------------
+silhouette_scores = []
+
+for k in k_range:
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = km.fit_predict(X_scaled)
+    sil_score = silhouette_score(X_scaled, labels)
+    silhouette_scores.append(sil_score)
+
+plt.figure()
+plt.plot(k_range, silhouette_scores, marker="o")
+plt.xlabel("Number of clusters (k)")
+plt.ylabel("Silhouette Score")
+plt.title("Silhouette Analysis for KMeans")
+plt.tight_layout()
+plt.show()
+
+for k, s in zip(k_range, silhouette_scores):
+    print(f"k={k}: silhouette={s:.3f}")
+
+
 
 # -----------------------------
 # 8. Fit clustering model
@@ -125,6 +150,25 @@ df["cluster"] = kmeans.fit_predict(X_scaled)
 print("\nCluster counts:")
 print(df["cluster"].value_counts().sort_index())
 
+# -----------------------------
+# 8b. Silhouette score for final clustering
+# -----------------------------
+silhouette_avg = silhouette_score(X_scaled, df["cluster"])
+print(f"\nAverage silhouette score (K={K}): {silhouette_avg:.3f}")
+
+
+
+silhouette_vals = silhouette_samples(X_scaled, df["cluster"])
+df["silhouette"] = silhouette_vals
+
+print("\nMean silhouette score by cluster:")
+print(
+    df.groupby("cluster")["silhouette"]
+      .mean()
+      .round(3)
+)
+
+
 
 # -----------------------------
 # 9. Cluster profiling
@@ -134,6 +178,9 @@ cluster_summary = (
       .mean()
       .round(2)
 )
+
+pd.set_option("display.max_columns", None)
+pd.set_option("display.width", None)
 
 print("\nCluster summary (means):")
 print(cluster_summary)
@@ -184,7 +231,7 @@ df["pca_2"] = X_pca[:, 1]
 fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
 
 # ---- Plot 1: Colored by cluster ----
-cluster_colors = ["black", "red", "yellow",]
+cluster_colors = ["black", "red", "yellow", "green", "blue"]
 
 sns.scatterplot(
     data=df,
